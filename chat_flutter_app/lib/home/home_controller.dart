@@ -94,7 +94,7 @@ class HomeController extends StatelessWidget
       ),
       home: new Scaffold(
         appBar: new AppBar(
-          title: new Text('朋友圈'),
+          title: new Text('首页'),
         ),
         body: new ListView.builder(
           itemCount: 10,
