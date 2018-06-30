@@ -16,20 +16,40 @@ class MyApp extends StatelessWidget {
           length: 3,
           child: new Scaffold(
             bottomNavigationBar: new Material(
+              type: MaterialType.canvas,
               color: Colors.white,
-              child: new TabBar(tabs: [
-                new Tab(icon: new Icon(Icons.home, color: Colors.grey,), text: '首页',),
-                new Tab(icon: new Icon(Icons.camera, color: Colors.grey,), text: '圈子',),
-                new Tab(icon: new Icon(Icons.person, color: Colors.grey,), text: '我的',),
-              ]),
+              child: new TabBar(
+                  isScrollable: false,
+                  indicatorColor: Colors.white,
+                  labelColor: Colors.blueAccent,
+                  unselectedLabelColor: Colors.grey,
+                  tabs: [
+                    new Tab(
+                      icon: new Icon(
+                        Icons.home,
+                      ),
+                      text: '首页',
+                    ),
+                    new Tab(
+                      icon: new Icon(
+                        Icons.camera,
+                      ),
+                      text: '圈子',
+                    ),
+                    new Tab(
+                      icon: new Icon(
+                        Icons.person,
+                      ),
+                      text: '我的',
+                    ),
+                  ]),
             ),
             body: new TabBarView(children: [
               new HomeController(),
               new TimelineController(),
               new MineController(),
             ]),
-          )
-      ),
+          )),
     );
   }
 }
