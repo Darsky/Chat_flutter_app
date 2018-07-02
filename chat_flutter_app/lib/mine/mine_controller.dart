@@ -200,17 +200,15 @@ class UserInfoSectionState extends State<UserInfoSection>
 
   void _setupDisplayWithUserInfo()
   {
-    if (_logined == false) {
-      _logined = true;
-    }
+    _logined = !_logined;
     setState(() {
       if (_logined) {
         _userName = '卖萌的二师兄';
         _userDes = '萌帅萌帅的';
       }
       else {
-
-
+        _userName = '请登录';
+        _userDes = '';
       }
     });
   }
@@ -218,7 +216,6 @@ class UserInfoSectionState extends State<UserInfoSection>
   @override
   Widget build(BuildContext context)
   {
-    // TODO: implement build
     return new Container(
         color: Colors.lightBlue,
         child: new Row(
