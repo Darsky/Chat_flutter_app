@@ -174,7 +174,7 @@ class MineController extends StatelessWidget
           body: new ListView(
             padding: const EdgeInsets.all(0.0),
             children: <Widget>[
-              topSection,
+              new UserInfoSection(),
               functionSection,
               sectionHeader('我管理的群组'),
               mineClassView,
@@ -185,3 +185,82 @@ class MineController extends StatelessWidget
         ));
   }
 }
+
+class UserInfoSection extends StatefulWidget
+{
+  @override
+  createState () =>new UserInfoSectionState();
+}
+
+class UserInfoSectionState extends State<UserInfoSection>
+{
+  bool _logined = false;
+  String _userName = '请登录';
+  String _userDes  = '';
+
+  void _setupDisplayWithUserInfo()
+  {
+    if (_logined == false) {
+      _logined = true;
+    }
+    setState(() {
+      if (_logined) {
+        _userName = '卖萌的二师兄';
+        _userDes = '萌帅萌帅的';
+      }
+      else {
+
+
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context)
+  {
+    // TODO: implement build
+    return new Container(
+        color: Colors.lightBlue,
+        child: new Row(
+          children: <Widget>[
+            new Expanded(
+              child: new Column(
+                children: <Widget>[
+                  new Container(
+                    margin: const EdgeInsets.only(top: 68.0),
+                    child: new FlatButton(
+                      onPressed: _setupDisplayWithUserInfo,
+                      child: new CircleAvatar(
+                      maxRadius: 39.0,
+                      backgroundImage: new AssetImage('images/homeHeader.png'),
+                    ),)
+                  ),
+                  new Container(
+                    margin: const EdgeInsets.only(top: 15.0),
+                    child: new Text(
+                      _userName,
+                      style: new TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white),
+                    ),
+                  ),
+                  new Container(
+                    margin: const EdgeInsets.fromLTRB(13.0, 12.0, 13.0, 17.0),
+                    child: new Text(
+                      _userDes,
+                      style: new TextStyle(
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white),
+                    ),
+                  )
+                  // ignore: argument_type_not_assignable
+                ],
+              ),
+            )
+          ],
+        ));
+  }
+}
+
