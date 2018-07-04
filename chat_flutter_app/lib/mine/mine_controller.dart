@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:chat_flutter_app/login/login_controller.dart';
 
 
 class MineController extends StatelessWidget
@@ -198,6 +199,18 @@ class UserInfoSectionState extends State<UserInfoSection>
   String _userName = '请登录';
   String _userDes  = '';
 
+  void _pushToLogin(){
+    if (!_logined){
+      Navigator.of(context).push(
+        new PageRouteBuilder(
+          pageBuilder: (BuildContext context ,_,__) {
+              return new LoginController();
+              },
+        )
+      );
+    }
+  }
+
   void _setupDisplayWithUserInfo()
   {
     _logined = !_logined;
@@ -226,7 +239,7 @@ class UserInfoSectionState extends State<UserInfoSection>
                   new Container(
                     margin: const EdgeInsets.only(top: 68.0),
                     child: new FlatButton(
-                      onPressed: _setupDisplayWithUserInfo,
+                      onPressed: _pushToLogin,
                       child: new CircleAvatar(
                       maxRadius: 39.0,
                       backgroundImage: new AssetImage('images/homeHeader.png'),

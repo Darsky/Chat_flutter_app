@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import './home/home_controller.dart';
+import 'package:chat_flutter_app/home/controller/home_controller.dart';
 import './timeline/timeline_controller.dart';
 import './mine/mine_controller.dart';
 
