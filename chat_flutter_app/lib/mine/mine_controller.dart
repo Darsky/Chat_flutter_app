@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:chat_flutter_app/login/login_controller.dart';
 
-
-class MineController extends StatelessWidget
+class MineController extends StatefulWidget
+{
+  @override
+  createState()=>new _MineControllerState();
+}
+class _MineControllerState extends State<MineController>
 {
   @override
   Widget build(BuildContext context) {
@@ -82,7 +86,7 @@ class MineController extends StatelessWidget
         onTap: () {
           print(title);
         },
-        child: functionButton(imageName, title),
+        child:functionButton(imageName, title),
       );
     }
 
@@ -202,8 +206,9 @@ class UserInfoSectionState extends State<UserInfoSection>
   void _pushToLogin(){
     if (!_logined){
       Navigator.of(context).push(
-        new PageRouteBuilder(
-          pageBuilder: (BuildContext context ,_,__) {
+        new MaterialPageRoute(
+          fullscreenDialog: true,
+          builder: (context) {
               return new LoginController();
               },
         )

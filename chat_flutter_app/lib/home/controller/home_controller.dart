@@ -17,6 +17,8 @@ class _HomeControllerState extends State<HomeController>{
   int   _pageIndex = 1;
 
   bool  _canLoadMore = true;
+
+
   @override
   Widget build(BuildContext context) {
     Container UserInfoRow(Article article) {
@@ -136,7 +138,6 @@ class _HomeControllerState extends State<HomeController>{
       }
 
     }
-
 
     return new MaterialApp(
       title: '首页',

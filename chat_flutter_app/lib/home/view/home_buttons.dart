@@ -13,8 +13,6 @@ class HomeLikeWidget extends StatefulWidget{
 
 class _HomeLikeWidgetState extends State<HomeLikeWidget>
 {
-
-
   void _addLikeCount(){
     setState(() {
       if (!widget.isLiked){

@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
-class TimelineController extends StatelessWidget
+class TimelineController extends StatefulWidget
+{
+  @override
+  createState() => _TimeLineControllerState();
+}
+
+class _TimeLineControllerState extends State<TimelineController>
 {
   @override
   Widget build(BuildContext context) {
