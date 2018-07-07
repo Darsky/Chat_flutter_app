@@ -10,6 +10,9 @@ description: My Flutter demo application.
 version: 1.0.0+1
 
 dependencies:
+  dio: ^0.0.14
+  fluro:
+    git: git://github.com/goposse/fluro.git
   flutter:
     sdk: flutter
 
