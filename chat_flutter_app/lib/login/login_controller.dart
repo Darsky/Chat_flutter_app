@@ -24,13 +24,27 @@ class _LoginControllerState extends State<LoginController>
 
   TextField passwordField;
 
-  CodeButton codeButton;
+  int countDownSecond = 0;
 
-  int countDownSecond;
-
+  Widget codeButton () {
+    return new Container(
+      width: 100.0,
+      height: 35.0,
+      decoration: new BoxDecoration(
+        color: countDownSecond == 0?Colors.blueAccent:Colors.grey[400],
+        borderRadius: BorderRadius.all(const Radius.circular(10.0)),
+      ),
+      child: new FlatButton(
+          onPressed: _didCodeButtonTouch,
+          child: new Text(
+            countDownSecond == 0 ?'获取验证码':'${countDownSecond}s',
+            style: new TextStyle(color: countDownSecond == 0? Colors.white:Colors.grey,fontSize: 12.0),
+          )),
+    );
+  }
 
   void _didCodeButtonTouch(){
-    if (countDownSecond > 0){
+    if (countDownSecond != 0){
       return;
     }
     if (_inputUserName == null || _inputUserName.length == 0){
@@ -43,7 +57,7 @@ class _LoginControllerState extends State<LoginController>
         },
       );
     }
-    else if (_inputUserName.length > 11){
+    else if (_inputUserName.length != 11){
       showDialog(context: context,
         builder: (BuildContext context){
           return new AlertDialog(
@@ -84,48 +98,59 @@ class _LoginControllerState extends State<LoginController>
     _startLogin();
   }
 
-  void _startGetCode()async {
-    var submitDic = {"mobile":_inputUserName};
-    ResponeObject asyncRequest = await RequestHelper.asyncRequest(true, 'user/getValidCode', submitDic,true);
-    String alertStirng;
-    if (asyncRequest.isSuccess){
-      alertStirng = '请求验证码成功';
-    }
-    else {
-      alertStirng = '${asyncRequest.content}';
-    }
-    setState(() {
-      showDialog(context: context,
-        builder: (BuildContext context){
-          return new AlertDialog(
-            title: new Text('温馨提示'),
-            content: new Text(alertStirng),
-          );
-        },
-      );
-      if(asyncRequest.isSuccess){
-        codeButton.touchEnable = false;
-        countDownSecond = 60;
-        _getCodeAgainCountDown();
-      }
-    });
+  void _startGetCode() {
+
+    new Future.delayed(const Duration(seconds:2),
+            (){
+              showDialog(context: context,
+                  builder: (BuildContext context){
+                    return new AlertDialog(
+                      title: new Text('温馨提示'),
+                      content: new Text('验证码获取成功'),
+                    );
+
+              });
+              countDownSecond = 20;
+              updateDisplay();
+        }
+    );
+
+
+
+//    var submitDic = {"mobile":_inputUserName};
+//    ResponeObject asyncRequest = await RequestHelper.asyncRequest(true, 'user/getValidCode', submitDic,true);
+//    String alertStirng;
+//    if (asyncRequest.isSuccess){
+//      alertStirng = '请求验证码成功';
+//    }
+//    else {
+//      alertStirng = '${asyncRequest.content}';
+//    }
+//    setState(() {
+//      showDialog(context: context,
+//        builder: (BuildContext context){
+//          return new AlertDialog(
+//            title: new Text('温馨提示'),
+//            content: new Text(alertStirng),
+//          );
+//        },
+//      );
+//      if(asyncRequest.isSuccess){
+//        codeButton.touchEnable = false;
+//      }
+//    });
   }
 
-  void _getCodeAgainCountDown() {
+  void updateDisplay(){
     setState(() {
       if (countDownSecond > 0){
-        codeButton.codeTitleString = '${countDownSecond}s';
+        print('倒数计时${countDownSecond}');
         countDownSecond--;
-        print('倒计时 ${countDownSecond}');
-        new Future.delayed(const Duration(seconds:1), (){_getCodeAgainCountDown();});
+        new Future.delayed(const Duration(seconds:1), (){updateDisplay();});
       }
       else{
-        print('倒计时 完成');
-        codeButton.codeTitleString = '获取验证码';
-        codeButton.touchEnable = true;
       }
-    }
-    );
+    });
   }
 
   void _startLogin() async{
@@ -135,7 +160,6 @@ class _LoginControllerState extends State<LoginController>
   void initState() {
     // TODO: implement initState
     super.initState();
-    countDownSecond = 0;
     userNameField = new TextField(
       controller: null,
       decoration: new InputDecoration(
@@ -159,9 +183,6 @@ class _LoginControllerState extends State<LoginController>
         _inputPassword = inputPassword;
       },
     );
-    codeButton = new CodeButton();
-    codeButton.codeTitleString = '获取验证码';
-    codeButton.didCodeButtonTouch = _didCodeButtonTouch;
   }
 
   @override
@@ -185,7 +206,7 @@ class _LoginControllerState extends State<LoginController>
               child: new Row(
                 children: <Widget>[
                   new Expanded(child: passwordField),
-                  codeButton,
+                  codeButton(),
                 ],
               ),
             ),
@@ -209,45 +230,3 @@ class _LoginControllerState extends State<LoginController>
   }
 }
 
-class CodeButton extends StatefulWidget{
-
-  String codeTitleString = '';
-  bool   touchEnable = true;
-  VoidCallback didCodeButtonTouch;
-
-  @override
-  createState() => new _CodeButtonState();
-}
-
-class _CodeButtonState extends State<CodeButton>{
-
-  void updateDisplay(){
-    setState(() {
-
-    });
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-
-  }
-  @override
-  Widget build(BuildContext context) {
-    // TODO: implement build
-    return new Container(
-      height: 35.0,
-      decoration: new BoxDecoration(
-        color: widget.touchEnable?Colors.blueAccent:Colors.grey[400],
-        borderRadius: BorderRadius.all(const Radius.circular(10.0)),
-      ),
-      child: new FlatButton(
-          onPressed: widget.didCodeButtonTouch,
-          child: new Text(
-            widget.codeTitleString,
-            style: new TextStyle(color: widget.touchEnable? Colors.white:Colors.grey),
-          )),
-    );
-  }
-}
