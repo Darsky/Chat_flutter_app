@@ -12,7 +12,6 @@ class ResponeObject{
 
 class RequestHelper {
 
-  RequestHelper();
   static  Future<ResponeObject> asyncRequest(bool isGetRequest,String actionUrl,Map<String, dynamic> param, bool tokenNeed) async{
     String url = 'https://service.newmoho.toyohu.com/';
     Dio dio = new Dio();
@@ -27,7 +26,12 @@ class RequestHelper {
       }
       if (response.statusCode == HttpStatus.OK){
         var json = await response.data;
-        resultObject = new ResponeObject(isSuccess: true,content: json);
+        if (json['code'].toString() == '1'){
+          resultObject = new ResponeObject(isSuccess: true,content: json);
+        }
+        else {
+          resultObject = new ResponeObject(isSuccess: false,content: json['msg']);
+        }
       }
       else{
         resultObject = new ResponeObject(isSuccess: false,content: '${response.statusCode.toString()}');

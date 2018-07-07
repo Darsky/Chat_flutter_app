@@ -17,11 +17,46 @@ class _LoginControllerState extends State<LoginController>
   final TextEditingController _controller = new TextEditingController();
 
   String _inputUserName;
+
   String _inputPassword;
 
   TextField userNameField;
 
   TextField passwordField;
+
+  CodeButton codeButton;
+
+  int countDownSecond;
+
+
+  void _didCodeButtonTouch(){
+    if (countDownSecond > 0){
+      return;
+    }
+    if (_inputUserName == null || _inputUserName.length == 0){
+      showDialog(context: context,
+        builder: (BuildContext context){
+          return new AlertDialog(
+            title: new Text('温馨提示'),
+            content: new Text('请输入手机号'),
+          );
+        },
+      );
+    }
+    else if (_inputUserName.length > 11){
+      showDialog(context: context,
+        builder: (BuildContext context){
+          return new AlertDialog(
+            title: new Text('温馨提示'),
+            content: new Text('请输入正确的手机号'),
+          );
+        },
+      );
+    }
+    else {
+      _startGetCode();
+    }
+  }
 
   void _didLoginButtonTouch(){
     if (_inputUserName == null || _inputUserName.length == 0){
@@ -40,7 +75,7 @@ class _LoginControllerState extends State<LoginController>
         builder: (BuildContext context){
           return new AlertDialog(
             title: new Text('温馨提示'),
-            content: new Text('请输入密码'),
+            content: new Text('请输入验证码'),
           );
         },
       );
@@ -49,29 +84,64 @@ class _LoginControllerState extends State<LoginController>
     _startLogin();
   }
 
-  void _startLogin() async{
+  void _startGetCode()async {
     var submitDic = {"mobile":_inputUserName};
     ResponeObject asyncRequest = await RequestHelper.asyncRequest(true, 'user/getValidCode', submitDic,true);
+    String alertStirng;
+    if (asyncRequest.isSuccess){
+      alertStirng = '请求验证码成功';
+    }
+    else {
+      alertStirng = '${asyncRequest.content}';
+    }
     setState(() {
       showDialog(context: context,
         builder: (BuildContext context){
           return new AlertDialog(
             title: new Text('温馨提示'),
-            content: new Text('${asyncRequest.content}'),
+            content: new Text(alertStirng),
           );
         },
       );
+      if(asyncRequest.isSuccess){
+        codeButton.touchEnable = false;
+        countDownSecond = 60;
+        _getCodeAgainCountDown();
+      }
     });
   }
 
+  void _getCodeAgainCountDown() {
+    setState(() {
+      if (countDownSecond > 0){
+        codeButton.codeTitleString = '${countDownSecond}s';
+        countDownSecond--;
+        print('倒计时 ${countDownSecond}');
+        new Future.delayed(const Duration(seconds:1), (){_getCodeAgainCountDown();});
+      }
+      else{
+        print('倒计时 完成');
+        codeButton.codeTitleString = '获取验证码';
+        codeButton.touchEnable = true;
+      }
+    }
+    );
+  }
 
+  void _startLogin() async{
+
+  }
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    countDownSecond = 0;
     userNameField = new TextField(
       controller: null,
       decoration: new InputDecoration(
-        hintText: '请输入用户名',
+        hintText: '请输入手机号',
       ),
+      keyboardType: TextInputType.number,
       style: new TextStyle(fontSize: 14.0,color: Colors.black45),
       onChanged: (String inputString){
         _inputUserName = inputString;
@@ -79,14 +149,24 @@ class _LoginControllerState extends State<LoginController>
     );
     passwordField = new TextField(
       decoration: new InputDecoration(
-        hintText: '请输入密码',
+        hintText: '请输入验证码',
       ),
-      obscureText: true,
+      maxLength: 6,
+      maxLengthEnforced: false,
+      keyboardType: TextInputType.number,
       style: new TextStyle(fontSize: 14.0,color: Colors.black45),
       onChanged: (String inputPassword){
         _inputPassword = inputPassword;
       },
     );
+    codeButton = new CodeButton();
+    codeButton.codeTitleString = '获取验证码';
+    codeButton.didCodeButtonTouch = _didCodeButtonTouch;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
     return  new Scaffold(
         appBar: new AppBar(
             title: new Text('登录')
@@ -102,7 +182,12 @@ class _LoginControllerState extends State<LoginController>
             new Container(
               padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
               height: 60.0,
-              child: passwordField,
+              child: new Row(
+                children: <Widget>[
+                  new Expanded(child: passwordField),
+                  codeButton,
+                ],
+              ),
             ),
             new Container(
               margin: const EdgeInsets.fromLTRB(40.0,40.0,40.0,0.0),
@@ -121,5 +206,48 @@ class _LoginControllerState extends State<LoginController>
         ),
       bottomNavigationBar: null,
       );
+  }
+}
+
+class CodeButton extends StatefulWidget{
+
+  String codeTitleString = '';
+  bool   touchEnable = true;
+  VoidCallback didCodeButtonTouch;
+
+  @override
+  createState() => new _CodeButtonState();
+}
+
+class _CodeButtonState extends State<CodeButton>{
+
+  void updateDisplay(){
+    setState(() {
+
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+  }
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return new Container(
+      height: 35.0,
+      decoration: new BoxDecoration(
+        color: widget.touchEnable?Colors.blueAccent:Colors.grey[400],
+        borderRadius: BorderRadius.all(const Radius.circular(10.0)),
+      ),
+      child: new FlatButton(
+          onPressed: widget.didCodeButtonTouch,
+          child: new Text(
+            widget.codeTitleString,
+            style: new TextStyle(color: widget.touchEnable? Colors.white:Colors.grey),
+          )),
+    );
   }
 }
