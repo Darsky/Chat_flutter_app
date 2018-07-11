@@ -105,7 +105,7 @@ class _LoginControllerState extends State<LoginController>
     new Future.delayed(const Duration(seconds:2),
             (){
               showDialog(context: context,
-                  barrierDismissible: false,
+                  barrierDismissible: true,
                   builder: (BuildContext context){
                     return new AlertDialog(
                       title: new Text('温馨提示'),
