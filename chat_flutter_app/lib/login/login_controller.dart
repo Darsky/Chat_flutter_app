@@ -24,6 +24,8 @@ class _LoginControllerState extends State<LoginController>
 
   TextField passwordField;
 
+  Timer codeTimer;
+
   int countDownSecond = 0;
 
   Widget codeButton () {
@@ -103,6 +105,7 @@ class _LoginControllerState extends State<LoginController>
     new Future.delayed(const Duration(seconds:2),
             (){
               showDialog(context: context,
+                  barrierDismissible: false,
                   builder: (BuildContext context){
                     return new AlertDialog(
                       title: new Text('温馨提示'),
@@ -111,7 +114,21 @@ class _LoginControllerState extends State<LoginController>
 
               });
               countDownSecond = 20;
-              updateDisplay();
+              if (codeTimer == null){
+                codeTimer = new Timer.periodic(const Duration(seconds: 1), (timer){
+                  if (countDownSecond > 0){
+                    print('倒数计时$countDownSecond');
+                    countDownSecond--;
+                    setState(() {
+
+                    });
+                  }
+                  else{
+                    timer.cancel();
+                    codeTimer = null;
+                  }
+                });
+              }
         }
     );
 
@@ -141,17 +158,6 @@ class _LoginControllerState extends State<LoginController>
 //    });
   }
 
-  void updateDisplay(){
-    setState(() {
-      if (countDownSecond > 0){
-        print('倒数计时${countDownSecond}');
-        countDownSecond--;
-        new Future.delayed(const Duration(seconds:1), (){updateDisplay();});
-      }
-      else{
-      }
-    });
-  }
 
   void _startLogin() async{
 

@@ -205,7 +205,7 @@ class UserInfoSectionState extends State<UserInfoSection>
 
   void _pushToLogin(){
     if (!_logined){
-      Navigator.of(context).push(
+      Navigator.of(context,rootNavigator: true).push(
         new MaterialPageRoute(
           fullscreenDialog: true,
           builder: (context) {
