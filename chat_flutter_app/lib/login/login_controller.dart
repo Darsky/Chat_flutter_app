@@ -136,6 +136,7 @@ class _LoginControllerState extends State<LoginController>
 
 //    var submitDic = {"mobile":_inputUserName};
 //    ResponeObject asyncRequest = await RequestHelper.asyncRequest(true, 'user/getValidCode', submitDic,true);
+//
 //    String alertStirng;
 //    if (asyncRequest.isSuccess){
 //      alertStirng = '请求验证码成功';
@@ -160,8 +161,53 @@ class _LoginControllerState extends State<LoginController>
 
 
   void _startLogin() async{
-
+    var submitDic = {"info":jsonEncode({"mobile":_inputUserName,
+      "validCode":_inputPassword,
+      "system":Platform.isIOS?"ios":"android"})
+    };
+    ResponeObject asyncRequest = await RequestHelper.asyncRequest(false, 'user/quickLogin', submitDic,true);
+    if (asyncRequest.isSuccess){
+      showDialog(context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context){
+            return new AlertDialog(
+              title: new Text('温馨提示'),
+              content: new Text('登录成功'),
+              actions: <Widget>[
+                new FlatButton(
+                    onPressed: finishLogin,
+                    child: Text('好的')
+                ),
+              ],
+            );
+          });
+    }
+    else {
+      showDialog(context: context,
+          builder: (BuildContext context){
+            return new AlertDialog(
+              title: new Text('温馨提示'),
+              content: new Text('${asyncRequest.content}'),
+            );
+          });
+    }
   }
+
+  void finishLogin(){
+    Navigator.of(context).pop();
+    Navigator.of(context).pop();
+  }
+
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    if (codeTimer != null){
+      codeTimer.cancel();
+    }
+    super.dispose();
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -198,38 +244,45 @@ class _LoginControllerState extends State<LoginController>
         appBar: new AppBar(
             title: new Text('登录')
         ),
-        body: new ListView(
-          children: <Widget>[
-            new Container(
-              padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-              margin: const EdgeInsets.only(top: 40.0),
-              height: 60.0,
-              child: userNameField,
-            ),
-            new Container(
-              padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
-              height: 60.0,
-              child: new Row(
-                children: <Widget>[
-                  new Expanded(child: passwordField),
-                  codeButton(),
-                ],
+
+        body: new GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: (){
+            FocusScope.of(context).requestFocus(new FocusNode());
+          },
+          child: new Column(
+            children: <Widget>[
+              new Container(
+                padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
+                margin: const EdgeInsets.only(top: 40.0),
+                height: 60.0,
+                child: userNameField,
               ),
-            ),
-            new Container(
-              margin: const EdgeInsets.fromLTRB(40.0,40.0,40.0,0.0),
-              padding: const EdgeInsets.fromLTRB(40.0, 5.0, 40.0, 5.0),
-              height: 60.0,
-              decoration: new BoxDecoration(
-                color: Colors.blueAccent,
-                borderRadius: BorderRadius.all(const Radius.circular(10.0)),
+              new Container(
+                padding: const EdgeInsets.fromLTRB(10.0, 5.0, 10.0, 5.0),
+                height: 60.0,
+                child: new Row(
+                  children: <Widget>[
+                    new Expanded(child: passwordField),
+                    codeButton(),
+                  ],
+                ),
               ),
-              child: new FlatButton(
-                onPressed: _didLoginButtonTouch,
-                child: new Text('登录',style: new TextStyle(color: Colors.white),),
+              new Container(
+                margin: const EdgeInsets.fromLTRB(0.0,40.0,0.0,0.0),
+                padding: const EdgeInsets.fromLTRB(40.0, 5.0, 40.0, 5.0),
+                height: 60.0,
+                decoration: new BoxDecoration(
+                  color: Colors.blueAccent,
+                  borderRadius: BorderRadius.all(const Radius.circular(10.0)),
+                ),
+                child: new FlatButton(
+                  onPressed: _didLoginButtonTouch,
+                  child: new Text('登录',style: new TextStyle(color: Colors.white),),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       bottomNavigationBar: null,
       );
