@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:chat_flutter_app/login/login_controller.dart';
+import 'package:chat_flutter_app/public/use_info.dart';
 
 class MineController extends StatefulWidget
 {
@@ -199,9 +200,10 @@ class UserInfoSection extends StatefulWidget
 
 class UserInfoSectionState extends State<UserInfoSection>
 {
+
   bool _logined = false;
-  String _userName = '请登录';
-  String _userDes  = '';
+  String _userName;
+  String _userDes;
 
   void _pushToLogin(){
     if (!_logined){
@@ -218,17 +220,32 @@ class UserInfoSectionState extends State<UserInfoSection>
 
   void _setupDisplayWithUserInfo()
   {
-    _logined = !_logined;
+    _logined = UserInfoManager().isLogin;
+    if (_logined) {
+      _userName = UserInfoManager().userInfo.uNickName;
+      _userDes = '萌帅萌帅的';
+    }
+    else {
+      _userName = '请登录';
+      _userDes  = '';
+    }
     setState(() {
-      if (_logined) {
-        _userName = '卖萌的二师兄';
-        _userDes = '萌帅萌帅的';
-      }
-      else {
-        _userName = '请登录';
-        _userDes = '';
-      }
     });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    _logined = UserInfoManager().isLogin;
+    if (_logined) {
+      _userName = UserInfoManager().userInfo.uNickName;
+      _userDes = '萌帅萌帅的';
+    }
+    else {
+      _userName = '请登录';
+      _userDes  = '';
+    }
+    super.initState();
   }
 
   @override

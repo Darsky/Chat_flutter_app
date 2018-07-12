@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:chat_flutter_app/public/use_info.dart';
 
 class LoginController extends StatefulWidget
 {
@@ -167,6 +168,8 @@ class _LoginControllerState extends State<LoginController>
     };
     ResponeObject asyncRequest = await RequestHelper.asyncRequest(false, 'user/quickLogin', submitDic,true);
     if (asyncRequest.isSuccess){
+      UserInfo userInfo = jsonDecode(asyncRequest.content['data']);
+      UserInfoManager().updateUserInfo(userInfo);
       showDialog(context: context,
           barrierDismissible: false,
           builder: (BuildContext context){

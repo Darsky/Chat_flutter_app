@@ -11,6 +11,7 @@ version: 1.0.0+1
 
 dependencies:
   dio: ^0.0.14
+  path_provider: ^0.4.1
   fluro:
     git: git://github.com/goposse/fluro.git
   flutter:
