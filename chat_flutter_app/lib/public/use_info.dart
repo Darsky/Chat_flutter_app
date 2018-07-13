@@ -1,56 +1,49 @@
-import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserInfoManager {
-  UserInfo userInfo;
-  bool isLogin;
 
-  static final Map<String, UserInfoManager> _cache = <String, UserInfoManager>{};
-
+  static Map<String, UserInfoManager> _cache = <String, UserInfoManager>{};
   factory UserInfoManager(){
     if (_cache.containsKey('userInfo')){
+      print('有，不再造');
       return _cache['userInfo'];
     }
     else {
-      final UserInfoManager userInfoManager = new UserInfoManager._internal();
+      print('没有，再造');
+      final UserInfoManager userInfoManager = new  UserInfoManager._internal();
+      userInfoManager.loadUserInfo();
       _cache['userInfo'] = userInfoManager;
+      print(_cache.values);
       return userInfoManager;
     }
   }
 
-  void updateUserInfo(UserInfo userInfo) async{
-    String dir = (await getApplicationDocumentsDirectory()).path;
-    File userInfoFile = File('$dir/userInfo');
-    await userInfoFile.writeAsString(jsonEncode(userInfo));
+  void updateUserInfo(UserInfo targetUserInfo) async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString('userInfo', jsonEncode(targetUserInfo.toJson()));
   }
 
-  void loadUserInfo() async {
 
-    String dir = (await getApplicationDocumentsDirectory()).path;
-    UserInfo tempUserInfo;
+  Future<UserInfo> loadUserInfo() async {
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    UserInfo userInfo;
     try {
-      File userInfoFile = File('$dir/userInfo');
-      String userInfoString = await userInfoFile.readAsString();
-      tempUserInfo = json.decode(userInfoString);
+      String userInfoString = prefs.get('userInfo');
+      userInfo = UserInfo.modelFromJson(json.decode(userInfoString)) ;
     } catch (exception) {
-      print('获取用户文件失败');
-      isLogin = false;
+      print('获取用户信息失败');
+
     } finally {
-      if (tempUserInfo != null){
-        isLogin = true;
-        userInfo = tempUserInfo;
-      }
-      else {
-        isLogin = false;
-      }
     }
+
+    return userInfo;
   }
 
-  UserInfoManager._internal() {
-    loadUserInfo();
-  }
+  UserInfoManager._internal();
 }
 
 class UserInfo {
@@ -75,4 +68,67 @@ class UserInfo {
   String activityNum;
   String mediaNumStr;
   String draftNum;
+  String token;
+
+  UserInfo();
+
+  UserInfo.modelFromJson(Map<String, dynamic> json){
+    uId = json['uId'] as String;
+    uNickName = json['nickName'] as String;
+    uHeadUrl = json['headUrl'] as String;
+    uSex = json['uSex'] == 1? true:false;
+    uBirthDate = json['uBirthDate'] as String;
+    uMobile = json['mobile'] as String;
+    uAuthentication = json['uAuthentication'];
+    openId = json['openId'] as String;
+    unionId = json['unionId'] as String;
+    uSignature = json['uSignature'] as String;
+    createTime = json['createTime'] as String;
+    subscribeNum = json['subscribeNum'] as int;
+    beSubscribeCount = json['beSubscribeCount'] as int;
+    mediaNum = json['mediaNum'] as int;
+    isSubscribe = json['isSubscribe'] as String;
+    joinBlacklist = json['joinBlacklist'] as String;
+    favoritesNum = json['favoritesNum'] as String;
+    groupNum = json['groupNum'] as String;
+    activityNum = json['activityNum'] as String;
+    mediaNumStr = json['mediaNumStr'] as String;
+    draftNum = json['draftNum'] as String;
+    token = json['token'] as String;
+  }
+
+  Map<String, dynamic> toJson() {
+
+    var val = <String, dynamic>{};
+
+    void writeNotNull(String key, dynamic value) {
+      if (value != null) {
+        val[key] = value;
+      }
+    }
+    writeNotNull('uId', uId);
+    writeNotNull('nickName', uNickName);
+    writeNotNull('headUrl', uHeadUrl);
+    writeNotNull('uSex', uSex);
+    writeNotNull('uBirthDate', uBirthDate);
+    writeNotNull('mobile', uMobile);
+    writeNotNull('uAuthentication', uAuthentication);
+    writeNotNull('openId', openId);
+    writeNotNull('unionId', unionId);
+    writeNotNull('uSignature', uSignature);
+    writeNotNull('createTime', createTime);
+    writeNotNull('subscribeNum', subscribeNum);
+    writeNotNull('beSubscribeCount', beSubscribeCount);
+    writeNotNull('mediaNum', mediaNum);
+    writeNotNull('isSubscribe', isSubscribe);
+    writeNotNull('joinBlacklist', joinBlacklist);
+    writeNotNull('favoritesNum', favoritesNum);
+    writeNotNull('groupNum', groupNum);
+    writeNotNull('activityNum', activityNum);
+    writeNotNull('mediaNumStr', mediaNumStr);
+    writeNotNull('draftNum', draftNum);
+    writeNotNull('token', token);
+
+    return val;
+  }
 }

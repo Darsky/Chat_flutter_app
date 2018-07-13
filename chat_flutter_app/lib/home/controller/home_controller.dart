@@ -11,13 +11,15 @@ class HomeController extends StatefulWidget
   createState() =>new _HomeControllerState();
 }
 
-class _HomeControllerState extends State<HomeController>{
+class _HomeControllerState extends State<HomeController> with AutomaticKeepAliveClientMixin{
 
   List<Article> _dataArray = new List();
 
   int   _pageIndex = 1;
 
   bool  _canLoadMore = true;
+
+  RefreshIndicator listTaleView;
 
   Container UserInfoRow(Article article) {
     return new Container(
@@ -134,17 +136,53 @@ class _HomeControllerState extends State<HomeController>{
 
       });
     }
-
   }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    if (listTaleView == null) {
+      listTaleView = new RefreshIndicator(
+        child: new FutureBuilder(
+          future: loadDataFromService(),
+          builder: (BuildContext context,
+              AsyncSnapshot<List<Article>> snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.none:
+                return Text('none');
+              case ConnectionState.waiting:
+                return Text('Waitting');
+              case ConnectionState.done:{
+                if (snapshot.data != null){
+                  if (_pageIndex == 1){
+                    _dataArray.clear();
+                  }
+                  _dataArray.addAll(snapshot.data);
+                }
+                return new ListView.builder(
+                    itemCount: _dataArray.length > 0 ? _dataArray
+                        .length : 0,
+                    itemBuilder: (context, i) {
+                      return TimelineCard(_dataArray[i]);
+                    }
+                );
+              }
+              default :
+                if (snapshot.hasError) {
+                  return Text('Error');
+                }
+            }
+          },
+        ),
+        onRefresh: loadData,
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+
     return new MaterialApp(
       title: '首页',
       theme: new ThemeData(
@@ -154,42 +192,12 @@ class _HomeControllerState extends State<HomeController>{
           appBar: new AppBar(
             title: new Text('首页'),
           ),
-          body: new RefreshIndicator(
-            child: new FutureBuilder(
-              future: loadDataFromService(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<List<Article>> snapshot) {
-                switch (snapshot.connectionState) {
-                  case ConnectionState.none:
-                    return Text('none');
-                  case ConnectionState.waiting:
-                    return Text('Waitting');
-                  case ConnectionState.done:{
-                    if (snapshot.data != null){
-                      if (_pageIndex == 1){
-                        _dataArray.clear();
-                      }
-                      _dataArray.addAll(snapshot.data);
-                    }
-                    return new ListView.builder(
-                        itemCount: _dataArray.length > 0 ? _dataArray
-                            .length : 0,
-                        itemBuilder: (context, i) {
-                          return TimelineCard(_dataArray[i]);
-                        }
-                    );
-
-                  }
-                  default :
-                    if (snapshot.hasError) {
-                      return Text('Error');
-                    }
-                }
-              },
-            ),
-            onRefresh: loadData,
-          )
+          body: listTaleView,
       ),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

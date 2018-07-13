@@ -3,7 +3,6 @@ import 'package:chat_flutter_app/RequestHelper.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
-import 'package:dio/dio.dart';
 import 'package:chat_flutter_app/public/use_info.dart';
 
 class LoginController extends StatefulWidget
@@ -13,8 +12,7 @@ class LoginController extends StatefulWidget
 }
 
 
-class _LoginControllerState extends State<LoginController>
-{
+class _LoginControllerState extends State<LoginController> {
   final TextEditingController _controller = new TextEditingController();
 
   String _inputUserName;
@@ -160,6 +158,9 @@ class _LoginControllerState extends State<LoginController>
 //    });
   }
 
+  getProgressDialog() {
+    return Center(child: CircularProgressIndicator());
+  }
 
   void _startLogin() async{
     var submitDic = {"info":jsonEncode({"mobile":_inputUserName,
@@ -168,7 +169,8 @@ class _LoginControllerState extends State<LoginController>
     };
     ResponeObject asyncRequest = await RequestHelper.asyncRequest(false, 'user/quickLogin', submitDic,true);
     if (asyncRequest.isSuccess){
-      UserInfo userInfo = jsonDecode(asyncRequest.content['data']);
+      Map<String, dynamic> dataDic = asyncRequest.content['data'];
+      UserInfo userInfo = UserInfo.modelFromJson(dataDic);
       UserInfoManager().updateUserInfo(userInfo);
       showDialog(context: context,
           barrierDismissible: false,

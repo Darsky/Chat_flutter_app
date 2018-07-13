@@ -6,8 +6,7 @@ class TimelineController extends StatefulWidget
   createState() => _TimeLineControllerState();
 }
 
-class _TimeLineControllerState extends State<TimelineController>
-{
+class _TimeLineControllerState extends State<TimelineController> with AutomaticKeepAliveClientMixin {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
@@ -25,4 +24,8 @@ class _TimeLineControllerState extends State<TimelineController>
       ),
     );
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }

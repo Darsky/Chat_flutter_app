@@ -1,17 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:chat_flutter_app/login/login_controller.dart';
 import 'package:chat_flutter_app/public/use_info.dart';
+import 'dart:async';
+import 'dart:convert';
+
 
 class MineController extends StatefulWidget
 {
   @override
   createState()=>new _MineControllerState();
 }
-class _MineControllerState extends State<MineController>
-{
+class _MineControllerState extends State<MineController> with AutomaticKeepAliveClientMixin {
+
+  Container topSection;
+  Widget functionSection;
+
+  Column functionButton(String imageName, String title) {
+    return new Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        new Container(
+          decoration: new BoxDecoration(
+            color: Colors.white,
+            border: new Border.all(color: Colors.grey, width: 0.3),
+            borderRadius: const BorderRadius.all(const Radius.circular(8.0)),
+          ),
+          alignment: Alignment.center,
+          child: new Image.asset(imageName,
+              alignment: Alignment.center, width: 34.0, height: 34.0),
+          width: 80.0,
+          height: 80.0,
+        ),
+        new Container(
+          margin: const EdgeInsets.only(top: 8.0),
+          child: new Text(
+            title,
+            style:
+            new TextStyle(fontSize: 16.0, color: const Color(0xff585757)),
+          ),
+        )
+      ],
+    );
+  }
+
+  GestureDetector functionButtonColumn(String imageName, String title)
+  {
+    return new GestureDetector(
+      onTap: () {
+        print(title);
+      },
+      child:functionButton(imageName, title),
+    );
+  }
+
+  Container sectionHeader(String title) {
+    return new Container(
+      margin: const EdgeInsets.only(left: 3.0),
+      child: new Row(
+        children: <Widget>[
+          new Container(
+            margin: const EdgeInsets.only(left: 6.5),
+            decoration: new BoxDecoration(color: const Color(0xff068afe)),
+            width: 3.0,
+            height: 17.0,
+          ),
+          new Container(
+            margin: const EdgeInsets.only(left: 6.5),
+            child: new Text(
+              title,
+              style: new TextStyle(
+                  fontSize: 16.0, color: const Color(0xff585757)),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+
+
+  Widget mineClassView = new Card(
+    child: new SizedBox.fromSize(
+      size: Size(166.0, 111.0),
+      child: new Stack(
+        fit: StackFit.expand,
+        children: <Widget>[
+          new Container(
+            child: new Image.asset(
+              'images/picture_demo.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          new Container(
+            padding: const EdgeInsets.all(0.0),
+            decoration: new BoxDecoration(
+              color: Colors.black45,
+            ),
+            child: new Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                new Text(
+                  'Group Name',
+                  style: new TextStyle(color: Colors.white, fontSize: 14.0),
+                ),
+                new Text(
+                  'Member Count',
+                  style: new TextStyle(color: Colors.white, fontSize: 9.0),
+                )
+              ],
+            ),
+          )
+        ],
+      ),
+    ),
+  );
+
   @override
-  Widget build(BuildContext context) {
-    Widget topSection = new Container(
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    topSection = new Container(
         color: Colors.lightBlue,
         child: new Row(
           children: <Widget>[
@@ -51,71 +159,7 @@ class _MineControllerState extends State<MineController>
             )
           ],
         ));
-
-
-    Column functionButton(String imageName, String title) {
-      return new Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          new Container(
-            decoration: new BoxDecoration(
-              color: Colors.white,
-              border: new Border.all(color: Colors.grey, width: 0.3),
-              borderRadius: const BorderRadius.all(const Radius.circular(8.0)),
-            ),
-            alignment: Alignment.center,
-            child: new Image.asset(imageName,
-                alignment: Alignment.center, width: 34.0, height: 34.0),
-            width: 80.0,
-            height: 80.0,
-          ),
-          new Container(
-            margin: const EdgeInsets.only(top: 8.0),
-            child: new Text(
-              title,
-              style:
-              new TextStyle(fontSize: 16.0, color: const Color(0xff585757)),
-            ),
-          )
-        ],
-      );
-    }
-
-    GestureDetector functionButtonColumn(String imageName, String title)
-    {
-      return new GestureDetector(
-        onTap: () {
-          print(title);
-        },
-        child:functionButton(imageName, title),
-      );
-    }
-
-    Container sectionHeader(String title) {
-      return new Container(
-        margin: const EdgeInsets.only(left: 3.0),
-        child: new Row(
-          children: <Widget>[
-            new Container(
-              margin: const EdgeInsets.only(left: 6.5),
-              decoration: new BoxDecoration(color: const Color(0xff068afe)),
-              width: 3.0,
-              height: 17.0,
-            ),
-            new Container(
-              margin: const EdgeInsets.only(left: 6.5),
-              child: new Text(
-                title,
-                style: new TextStyle(
-                    fontSize: 16.0, color: const Color(0xff585757)),
-              ),
-            )
-          ],
-        ),
-      );
-    }
-
-    Widget functionSection = new Container(
+    functionSection = new Container(
       height: 120.0,
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -126,44 +170,10 @@ class _MineControllerState extends State<MineController>
         ],
       ),
     );
+  }
 
-    Widget mineClassView = new Card(
-      child: new SizedBox.fromSize(
-        size: Size(166.0, 111.0),
-        child: new Stack(
-          fit: StackFit.expand,
-          children: <Widget>[
-            new Container(
-              child: new Image.asset(
-                'images/picture_demo.png',
-                fit: BoxFit.cover,
-              ),
-            ),
-            new Container(
-              padding: const EdgeInsets.all(0.0),
-              decoration: new BoxDecoration(
-                color: Colors.black45,
-              ),
-              child: new Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  new Text(
-                    'Group Name',
-                    style: new TextStyle(color: Colors.white, fontSize: 14.0),
-                  ),
-                  new Text(
-                    'Member Count',
-                    style: new TextStyle(color: Colors.white, fontSize: 9.0),
-                  )
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-
-
+  @override
+  Widget build(BuildContext context) {
     return new MaterialApp(
         title: 'Flutter Demo',
         theme: new ThemeData(
@@ -190,6 +200,10 @@ class _MineControllerState extends State<MineController>
           ),
         ));
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
 
 class UserInfoSection extends StatefulWidget
@@ -218,11 +232,13 @@ class UserInfoSectionState extends State<UserInfoSection>
     }
   }
 
-  void _setupDisplayWithUserInfo()
+  void _setupDisplayWithUserInfo () async
   {
-    _logined = UserInfoManager().isLogin;
+    UserInfo userInfo = await UserInfoManager().loadUserInfo();
+
+    _logined = userInfo == null?false:true;
     if (_logined) {
-      _userName = UserInfoManager().userInfo.uNickName;
+      _userName = userInfo.uNickName;
       _userDes = '萌帅萌帅的';
     }
     else {
@@ -236,16 +252,11 @@ class UserInfoSectionState extends State<UserInfoSection>
   @override
   void initState() {
     // TODO: implement initState
-    _logined = UserInfoManager().isLogin;
-    if (_logined) {
-      _userName = UserInfoManager().userInfo.uNickName;
-      _userDes = '萌帅萌帅的';
-    }
-    else {
-      _userName = '请登录';
-      _userDes  = '';
-    }
     super.initState();
+    _logined = false;
+    _userName = '请登录';
+    _userDes  = '';
+    _setupDisplayWithUserInfo();
   }
 
   @override
