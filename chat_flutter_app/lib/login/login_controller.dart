@@ -167,7 +167,7 @@ class _LoginControllerState extends State<LoginController> {
       "validCode":_inputPassword,
       "system":Platform.isIOS?"ios":"android"})
     };
-    ResponeObject asyncRequest = await RequestHelper.asyncRequest(false, 'user/quickLogin', submitDic,true);
+    ResponeObject asyncRequest = await RequestHelper.asyncRequest(false, 'user/quickLogin', submitDic,false);
     if (asyncRequest.isSuccess){
       Map<String, dynamic> dataDic = asyncRequest.content['data'];
       UserInfo userInfo = UserInfo.modelFromJson(dataDic);

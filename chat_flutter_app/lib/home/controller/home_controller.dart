@@ -4,6 +4,8 @@ import 'dart:math';
 import 'package:chat_flutter_app/home/view/home_buttons.dart';
 import 'package:chat_flutter_app/home/model/home_article.dart';
 import 'package:chat_flutter_app/public/use_info.dart';
+import 'package:chat_flutter_app/RequestHelper.dart';
+
 
 class HomeController extends StatefulWidget
 {
@@ -28,7 +30,7 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
         children: <Widget>[
           new CircleAvatar(
             maxRadius: 20.0,
-            backgroundImage: new NetworkImage(article.headUrl),
+            backgroundImage: new NetworkImage(article.user.uHeadUrl),
           ),
 
           new Expanded(child: new Container(
@@ -38,7 +40,7 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
               children: <Widget>[
                 new Container(
                   padding: const EdgeInsets.only(bottom: 8.0),
-                  child: new Text(article.user, style: new TextStyle(
+                  child: new Text(article.user.uNickName, style: new TextStyle(
                       fontSize: 14.0, color: Colors.black45)),
                 ),
                 new Text('From Group',
@@ -72,17 +74,18 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
         children: <Widget>[
           new FlatButton(onPressed: null,
               child: new HomeLikeWidget(
-                isLiked: article.isLike, likeCount: article.likeNum,)),
+                isLiked: article.isFavorites > 0?true:false, likeCount: article.mFavoritesNum,)),
           new Icon(Icons.comment, color: Colors.grey[400],),
           new Container(
             margin: const EdgeInsets.fromLTRB(5.0, 0.0, 5.0, 0.0),
-            child: new Text(article.commentNum.toString()),
+            child: new Text(article.mCommentNum.toString()),
           ),
         ],
       ),
     );
   }
   Widget TimelineCard(Article article) {
+
     return Card(
       margin: const EdgeInsets.fromLTRB(10.0, 13.0, 10.0, 5.0),
       child: new SizedBox(
@@ -91,9 +94,10 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
             UserInfoRow(article),
             new Container(
               padding: const EdgeInsets.all(13.0),
-              child: new Image.network(article.imgUrl == null?'':article.imgUrl),
+              height: 120.0,
+              child: new Image.network(article.coverUrl == null?'':article.coverUrl),
             ),
-            contentRow(article.title),
+            contentRow(article.mDescribe),
             likeAndCommentRow(article),
           ],
         ),
@@ -104,28 +108,26 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
   Future<List<Article>> loadDataFromService() async {
     Random random = new Random();
     int dataCount = random.nextInt(10);
-    List<Article> resultArray = new List();
-    for (int i = 0; i < dataCount; i++) {
-      Article artcle = new Article(
-        headUrl: 'https://pic3.zhimg.com/50/v2-8943c20cecab028e19644cccf0f3a38b_s.jpg',
-        user: '帅哥' + (i+1).toString(),
-        groupName: '我的好友',
-        time: '2018-07-04',
-        isLike: false,
-        likeNum: 0,
-        commentNum: 0,
-        title: '我是标题',
-        imgUrl: 'https://pic4.zhimg.com/v2-a7493d69f0d8f849c6345f8f693454f3_200x112.jpg',
-      );
-      resultArray.add(artcle);
+    ResponeObject asyncRequest = await RequestHelper.asyncRequest(true, 'recommendation/index', null,true);
+    if (asyncRequest.isSuccess) {
+      List<Article> resultArray = new List();
+      Map<String, dynamic> dataDic = asyncRequest.content['data'];
+      List<dynamic> dataArray = dataDic['hotContent'];
+      print('本次数据 ${dataArray.length}');
+      for (int i = 0; i < dataArray.length; i++) {
+        resultArray.add(new Article.modelFronJson(dataArray[i]));
+      }
+      if (resultArray.length >= 10){
+        _canLoadMore = true;
+      }
+      else{
+        _canLoadMore = false;
+      }
+      return resultArray;
     }
-    if (resultArray.length >= 10){
-      _canLoadMore = true;
+    else {
+      return null;
     }
-    else{
-      _canLoadMore = false;
-    }
-    return resultArray;
   }
 
   Future<Null> loadData() async {
