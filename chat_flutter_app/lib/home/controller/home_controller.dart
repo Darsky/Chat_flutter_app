@@ -5,7 +5,6 @@ import 'package:chat_flutter_app/home/model/home_article.dart';
 import 'package:chat_flutter_app/public/use_info.dart';
 import 'package:chat_flutter_app/RequestHelper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chat_flutter_app/public/Refresh.dart';
 import 'package:flutter/cupertino.dart';
 
 
@@ -205,7 +204,7 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
               case ConnectionState.none:
                 return Text('none');
               case ConnectionState.waiting:
-                return Text('Waitting');
+                return CircularProgressIndicator();
               case ConnectionState.done:{
                 return new ListView.builder(
                     itemCount: _dataArray.length > 0 ? _dataArray
@@ -268,6 +267,78 @@ class TimelineCard extends StatefulWidget {
 
 class _TimelineCardState extends State<TimelineCard> {
 
+  Future<Null> didTouchOnLikeButton (Article article) async {
+    UserInfo userInfo = await UserInfoManager().loadUserInfo();
+    if (userInfo == null) {
+      showDialog(context: context,builder: (BuildContext context){
+        return new AlertDialog(
+          title: new Text('温馨提示'),
+          content: new Text('您还未登录，请登录后操作'),
+        );
+      });
+    }
+    else if (article.isFavorites > 0) {
+      var submitDic = {
+        'mId':'${article.mId}',
+        'mfType':'media'
+      };
+      ResponeObject asyncRequest = await RequestHelper.asyncRequest(false, 'mediaFavorites/cancel', submitDic, true);
+      if (asyncRequest.isSuccess) {
+        showDialog(context: context,
+            builder: (BuildContext context){
+              return new AlertDialog(
+                title: new Text('温馨提示'),
+                content: new Text('操作成功'),
+              );
+            });
+        setState(() {
+          article.isFavorites = 0;
+          article.mFavoritesNum --;
+        });
+      }
+      else {
+        showDialog(context: context,
+            builder: (BuildContext context){
+              return new AlertDialog(
+                title: new Text('温馨提示'),
+                content: new Text('${asyncRequest.content}'),
+              );
+            });
+      }
+    }
+    else {
+      var submitDic = {
+        'mId':'${article.mId}',
+        'mfType':'media'
+      };
+      ResponeObject asyncRequest = await RequestHelper.asyncRequest(false, 'mediaFavorites/create', submitDic, true);
+      if (asyncRequest.isSuccess) {
+        showDialog(context: context,
+            builder: (BuildContext context){
+              return new AlertDialog(
+                title: new Text('温馨提示'),
+                content: new Text('收藏成功'),
+              );
+            });
+        setState(() {
+          article.isFavorites = 1;
+          article.mFavoritesNum ++;
+        });
+
+      }
+      else {
+        showDialog(context: context,
+            builder: (BuildContext context){
+              return new AlertDialog(
+                title: new Text('温馨提示'),
+                content: new Text('${asyncRequest.content}'),
+              );
+            });
+
+      }
+    }
+  }
+
   Container UserInfoRow(Article article) {
     return new Container(
       padding: const EdgeInsets.all(13.0),
@@ -323,7 +394,7 @@ class _TimelineCardState extends State<TimelineCard> {
         children: <Widget>[
           new FlatButton(
               padding: const EdgeInsets.all(0.0),
-              onPressed: widget.didTouchOnLike,
+              onPressed: () => didTouchOnLikeButton(widget.article),
               child: new HomeLikeWidget(
                 isLiked: article.isFavorites > 0?true:false,
                 likeCount: article.mFavoritesNum,)),
