@@ -5,6 +5,7 @@ import 'package:chat_flutter_app/home/view/home_buttons.dart';
 import 'package:chat_flutter_app/home/model/home_article.dart';
 import 'package:chat_flutter_app/public/use_info.dart';
 import 'package:chat_flutter_app/RequestHelper.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 
 class HomeController extends StatefulWidget
@@ -30,7 +31,8 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
         children: <Widget>[
           new CircleAvatar(
             maxRadius: 20.0,
-            backgroundImage: new NetworkImage(article.user.uHeadUrl),
+            backgroundColor: Colors.white,
+            backgroundImage: new CachedNetworkImageProvider(article.user.uHeadUrl),
           ),
 
           new Expanded(child: new Container(
@@ -56,11 +58,12 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
 
   Container contentRow(String content) {
     return new Container(
-      height: 40.0,
+      height: 50.0,
       padding: const EdgeInsets.all(13.0),
       alignment: Alignment.centerLeft,
       child: new Text(
         content,
+        maxLines: 2,
         style: new TextStyle(fontSize: 16.0, color: Colors.black45),
       ),
     );
@@ -95,7 +98,13 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
             new Container(
               padding: const EdgeInsets.all(13.0),
               height: 120.0,
-              child: new Image.network(article.coverUrl == null?'':article.coverUrl),
+              child: new CachedNetworkImage(
+                imageUrl: article.coverUrl == null?'':article.coverUrl,
+                fit: BoxFit.contain,
+                placeholder: new Image.asset('images/img_loading@3x.png'),
+                fadeInDuration: const Duration(seconds: 0),
+                fadeOutDuration: const Duration(seconds: 0),
+              ),
             ),
             contentRow(article.mDescribe),
             likeAndCommentRow(article),
