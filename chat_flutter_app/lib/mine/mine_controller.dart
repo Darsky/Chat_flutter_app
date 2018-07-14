@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:chat_flutter_app/login/login_controller.dart';
 import 'package:chat_flutter_app/public/use_info.dart';
-import 'dart:async';
-import 'dart:convert';
-
+import 'package:cached_network_image/cached_network_image.dart';
 
 class MineController extends StatefulWidget
 {
@@ -218,6 +216,7 @@ class UserInfoSectionState extends State<UserInfoSection>
   bool _logined = false;
   String _userName;
   String _userDes;
+  ImageProvider _headerImageProvider;
 
   void _pushToLogin(){
     if (!_logined){
@@ -240,10 +239,13 @@ class UserInfoSectionState extends State<UserInfoSection>
     if (_logined) {
       _userName = userInfo.uNickName;
       _userDes = '萌帅萌帅的';
+      _headerImageProvider = new CachedNetworkImageProvider(userInfo.uHeadUrl);
+
     }
     else {
       _userName = '请登录';
       _userDes  = '';
+      _headerImageProvider = new AssetImage('images/homeHeader.png');
     }
     setState(() {
     });
@@ -275,7 +277,7 @@ class UserInfoSectionState extends State<UserInfoSection>
                       onPressed: _pushToLogin,
                       child: new CircleAvatar(
                       maxRadius: 39.0,
-                      backgroundImage: new AssetImage('images/homeHeader.png'),
+                      backgroundImage: _headerImageProvider,
                     ),)
                   ),
                   new Container(

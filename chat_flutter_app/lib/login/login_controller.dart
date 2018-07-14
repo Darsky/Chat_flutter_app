@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'package:chat_flutter_app/public/use_info.dart';
+import 'package:flutter/cupertino.dart';
 
 class LoginController extends StatefulWidget
 {
@@ -175,7 +176,7 @@ class _LoginControllerState extends State<LoginController> {
       showDialog(context: context,
           barrierDismissible: false,
           builder: (BuildContext context){
-            return new AlertDialog(
+            return new CupertinoAlertDialog(
               title: new Text('温馨提示'),
               content: new Text('登录成功'),
               actions: <Widget>[

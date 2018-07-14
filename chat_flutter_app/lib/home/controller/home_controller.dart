@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:math';
 import 'package:chat_flutter_app/home/view/home_buttons.dart';
 import 'package:chat_flutter_app/home/model/home_article.dart';
 import 'package:chat_flutter_app/public/use_info.dart';
 import 'package:chat_flutter_app/RequestHelper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat_flutter_app/public/Refresh.dart';
+import 'package:flutter/cupertino.dart';
 
 
 class HomeController extends StatefulWidget
@@ -23,6 +24,249 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
   bool  _canLoadMore = true;
 
   RefreshIndicator listTaleView;
+
+
+  Future<Null> startLoadDataFromService () async {
+    print('开始加载');
+    _pageIndex = 1;
+    _canLoadMore = true;
+    ResponeObject asyncRequest = await RequestHelper.asyncRequest(
+        true, 'recommendation/index', null, true);
+    if (asyncRequest.isSuccess) {
+      setState(() {
+        List<Article> resultArray = new List();
+        Map<String, dynamic> dataDic = asyncRequest.content['data'];
+        List<dynamic> dataArray = dataDic['hotContent'];
+        for (int i = 0; i < dataArray.length; i++) {
+          resultArray.add(new Article.modelFronJson(dataArray[i]));
+        }
+        _dataArray = resultArray;
+        if (resultArray.length >= 10) {
+          _canLoadMore = true;
+          _pageIndex ++;
+        }
+        else {
+          _canLoadMore = false;
+        }
+      });
+      return Future.delayed(Duration(milliseconds: 100), () {
+
+      });
+    }
+    else
+    {
+      showDialog(context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context){
+            return new CupertinoAlertDialog(
+              title: new Text('温馨提示'),
+              content: new Text(asyncRequest.content),
+            );
+          });
+      return Future.delayed(Duration(milliseconds: 100), () {
+
+      });
+    }
+  }
+
+  Future<Null> loadDataFromService() async {
+    if (_canLoadMore == false) {
+      return Future.delayed(Duration(milliseconds: 100), () {
+
+      });
+    }
+    var submitDic = {'page':_pageIndex};
+    ResponeObject asyncRequest = await RequestHelper.asyncRequest(
+        true, 'recommendation/hotContent', submitDic, true);
+    if (asyncRequest.isSuccess) {
+      setState(() {
+        List<Article> resultArray = new List();
+        List<dynamic> dataArray = asyncRequest.content['data'];
+        for (int i = 0; i < dataArray.length; i++) {
+          resultArray.add(new Article.modelFronJson(dataArray[i]));
+        }
+        _dataArray.addAll(resultArray);
+        if (resultArray.length >= 10) {
+          _canLoadMore = true;
+          _pageIndex ++;
+        }
+        else {
+          _canLoadMore = false;
+        }
+      });
+      return Future.delayed(Duration(milliseconds: 100), () {
+
+      });
+    }
+    else
+    {
+      showDialog(context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context){
+            return new CupertinoAlertDialog(
+              title: new Text('温馨提示'),
+              content: new Text(asyncRequest.content),
+            );
+          });
+      return Future.delayed(Duration(milliseconds: 100), () {
+
+      });
+    }
+  }
+
+
+  Future<Null> likeOrCancelLike (Article article) async {
+    UserInfo userInfo = await UserInfoManager().loadUserInfo();
+    if (userInfo == null) {
+      showDialog(context: context,builder: (BuildContext context){
+        return new AlertDialog(
+          title: new Text('温馨提示'),
+          content: new Text('您还未登录，请登录后操作'),
+        );
+      });
+    }
+    else if (article.isFavorites > 0) {
+      var submitDic = {
+        'mId':'${article.mId}',
+        'mfType':'media'
+      };
+      ResponeObject asyncRequest = await RequestHelper.asyncRequest(false, 'mediaFavorites/cancel', submitDic, true);
+      if (asyncRequest.isSuccess) {
+        showDialog(context: context,
+            builder: (BuildContext context){
+              return new AlertDialog(
+                title: new Text('温馨提示'),
+                content: new Text('操作成功'),
+              );
+            });
+        setState(() {
+          article.isFavorites = 0;
+          article.mFavoritesNum --;
+        });
+      }
+      else {
+        showDialog(context: context,
+            builder: (BuildContext context){
+              return new AlertDialog(
+                title: new Text('温馨提示'),
+                content: new Text('${asyncRequest.content}'),
+              );
+            });
+      }
+    }
+    else {
+      var submitDic = {
+        'mId':'${article.mId}',
+        'mfType':'media'
+      };
+      ResponeObject asyncRequest = await RequestHelper.asyncRequest(false, 'mediaFavorites/create', submitDic, true);
+      if (asyncRequest.isSuccess) {
+        showDialog(context: context,
+            builder: (BuildContext context){
+              return new AlertDialog(
+                title: new Text('温馨提示'),
+                content: new Text('收藏成功'),
+              );
+            });
+        setState(() {
+          article.isFavorites = 1;
+          article.mFavoritesNum ++;
+        });
+        return Future.delayed(Duration(milliseconds: 100), () {
+
+        });
+      }
+      else {
+        showDialog(context: context,
+            builder: (BuildContext context){
+              return new AlertDialog(
+                title: new Text('温馨提示'),
+                content: new Text('${asyncRequest.content}'),
+              );
+            });
+        return Future.delayed(Duration(milliseconds: 100), () {
+
+        });
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (listTaleView == null) {
+      listTaleView = new RefreshIndicator(
+        child: new FutureBuilder(
+          future: loadDataFromService(),
+          builder: (BuildContext context,
+              AsyncSnapshot<List<Article>> snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.none:
+                return Text('none');
+              case ConnectionState.waiting:
+                return Text('Waitting');
+              case ConnectionState.done:{
+                return new ListView.builder(
+                    itemCount: _dataArray.length > 0 ? _dataArray
+                        .length : 0,
+                    itemBuilder: (context, i) {
+                      Article article = _dataArray[i];
+                      return TimelineCard(
+                        article: article,
+                        didSelectItem: null,
+                        didTouchOnLike: ()=>likeOrCancelLike(article),
+                        didTouchOnComment: null,
+                      );
+                    }
+                );
+              }
+              default :
+                if (snapshot.hasError) {
+                  return Text('Error');
+                }
+            }
+          },
+        ),
+        onRefresh: startLoadDataFromService,
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new MaterialApp(
+      title: '首页',
+      theme: new ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: new Scaffold(
+          appBar: new AppBar(
+            title: new Text('首页'),
+          ),
+          body: Center(
+            child: listTaleView,
+          ),
+      ),
+    );
+  }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
+}
+
+class TimelineCard extends StatefulWidget {
+  Article article;
+  VoidCallback didSelectItem;
+  VoidCallback didTouchOnLike;
+  VoidCallback didTouchOnComment;
+  TimelineCard({this.article,this.didSelectItem,this.didTouchOnLike,this.didTouchOnComment});
+  @override
+  createState() => new _TimelineCardState();
+}
+
+class _TimelineCardState extends State<TimelineCard> {
 
   Container UserInfoRow(Article article) {
     return new Container(
@@ -71,144 +315,55 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
 
   Container likeAndCommentRow(Article article) {
     return new Container(
-      padding: const EdgeInsets.fromLTRB(0.0, 5.0, 13.0, 5.0),
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+      height: 60.0,
+      margin: const EdgeInsets.fromLTRB(0.0, 5.0, 5.0, 5.0),
+      alignment: Alignment.centerRight,
+      child: new ButtonBar(
+        alignment: MainAxisAlignment.end,
         children: <Widget>[
-          new FlatButton(onPressed: null,
+          new FlatButton(
+              padding: const EdgeInsets.all(0.0),
+              onPressed: widget.didTouchOnLike,
               child: new HomeLikeWidget(
-                isLiked: article.isFavorites > 0?true:false, likeCount: article.mFavoritesNum,)),
-          new Icon(Icons.comment, color: Colors.grey[400],),
-          new Container(
-            margin: const EdgeInsets.fromLTRB(5.0, 0.0, 5.0, 0.0),
-            child: new Text(article.mCommentNum.toString()),
-          ),
+                isLiked: article.isFavorites > 0?true:false,
+                likeCount: article.mFavoritesNum,)),
+          new FlatButton(
+              padding: const EdgeInsets.all(0.0),
+              onPressed: widget.didTouchOnComment,
+              child: new HomeLikeWidget(
+                isLiked: false,
+                likeCount: article.mCommentNum,))
         ],
       ),
     );
   }
-  Widget TimelineCard(Article article) {
 
-    return Card(
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+     return Card(
       margin: const EdgeInsets.fromLTRB(10.0, 13.0, 10.0, 5.0),
       child: new SizedBox(
         child: Column(
           children: <Widget>[
-            UserInfoRow(article),
+            UserInfoRow(widget.article),
             new Container(
               padding: const EdgeInsets.all(13.0),
               height: 120.0,
               child: new CachedNetworkImage(
-                imageUrl: article.coverUrl == null?'':article.coverUrl,
+                imageUrl: widget.article.coverUrl == null?'':widget.article.coverUrl,
                 fit: BoxFit.contain,
                 placeholder: new Image.asset('images/img_loading@3x.png'),
                 fadeInDuration: const Duration(seconds: 0),
                 fadeOutDuration: const Duration(seconds: 0),
               ),
             ),
-            contentRow(article.mDescribe),
-            likeAndCommentRow(article),
+            contentRow(widget.article.mDescribe),
+            likeAndCommentRow(widget.article),
           ],
         ),
       ),
     );
   }
-
-  Future<List<Article>> loadDataFromService() async {
-    Random random = new Random();
-    int dataCount = random.nextInt(10);
-    ResponeObject asyncRequest = await RequestHelper.asyncRequest(true, 'recommendation/index', null,true);
-    if (asyncRequest.isSuccess) {
-      List<Article> resultArray = new List();
-      Map<String, dynamic> dataDic = asyncRequest.content['data'];
-      List<dynamic> dataArray = dataDic['hotContent'];
-      print('本次数据 ${dataArray.length}');
-      for (int i = 0; i < dataArray.length; i++) {
-        resultArray.add(new Article.modelFronJson(dataArray[i]));
-      }
-      if (resultArray.length >= 10){
-        _canLoadMore = true;
-      }
-      else{
-        _canLoadMore = false;
-      }
-      return resultArray;
-    }
-    else {
-      return null;
-    }
-  }
-
-  Future<Null> loadData() async {
-    if (_canLoadMore){
-      _pageIndex ++;
-      loadDataFromService();
-      setState(() {
-
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    if (listTaleView == null) {
-      listTaleView = new RefreshIndicator(
-        child: new FutureBuilder(
-          future: loadDataFromService(),
-          builder: (BuildContext context,
-              AsyncSnapshot<List<Article>> snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.none:
-                return Text('none');
-              case ConnectionState.waiting:
-                return Text('Waitting');
-              case ConnectionState.done:{
-                if (snapshot.data != null){
-                  if (_pageIndex == 1){
-                    _dataArray.clear();
-                  }
-                  _dataArray.addAll(snapshot.data);
-                }
-                return new ListView.builder(
-                    itemCount: _dataArray.length > 0 ? _dataArray
-                        .length : 0,
-                    itemBuilder: (context, i) {
-                      return TimelineCard(_dataArray[i]);
-                    }
-                );
-              }
-              default :
-                if (snapshot.hasError) {
-                  return Text('Error');
-                }
-            }
-          },
-        ),
-        onRefresh: loadData,
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-
-    return new MaterialApp(
-      title: '首页',
-      theme: new ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: new Scaffold(
-          appBar: new AppBar(
-            title: new Text('首页'),
-          ),
-          body: listTaleView,
-      ),
-    );
-  }
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
 }
+

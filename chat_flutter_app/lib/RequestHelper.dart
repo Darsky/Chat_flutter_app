@@ -26,6 +26,7 @@ class RequestHelper {
     }
     Dio dio = new Dio();
     ResponeObject resultObject;
+    print('开始请求 $url');
     try {
       Response response;
       if (isGetRequest){
