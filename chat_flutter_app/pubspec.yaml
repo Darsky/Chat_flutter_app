@@ -48,6 +48,8 @@ flutter:
   - images/home_task.png
   - images/picture_demo.png
   - images/img_loading@3x.png
+  - images/content_follow.png
+  - images/content_notfollow.png
 
 
   # To add assets to your application, add an assets section, like this:

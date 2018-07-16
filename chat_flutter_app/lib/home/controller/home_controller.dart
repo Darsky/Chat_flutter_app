@@ -6,6 +6,7 @@ import 'package:chat_flutter_app/public/use_info.dart';
 import 'package:chat_flutter_app/RequestHelper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:chat_flutter_app/content/controller/content_detail_controller.dart';
 
 
 class HomeController extends StatefulWidget
@@ -190,6 +191,19 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
     }
   }
 
+  void didSelectContentAtIndex (int index) {
+    Article article = _dataArray[index];
+    ContentDetailController controller = new ContentDetailController(mId: article.mId);
+    Navigator.of(context,rootNavigator: true).push(
+      new MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (context) {
+          return controller;
+        },
+      )
+    );
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -213,7 +227,7 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
                       Article article = _dataArray[i];
                       return TimelineCard(
                         article: article,
-                        didSelectItem: null,
+                        didSelectItem: () => didSelectContentAtIndex(i),
                         didTouchOnComment: null,
                       );
                     }
@@ -413,23 +427,26 @@ class _TimelineCardState extends State<TimelineCard> {
      return Card(
       margin: const EdgeInsets.fromLTRB(10.0, 13.0, 10.0, 5.0),
       child: new SizedBox(
-        child: Column(
-          children: <Widget>[
-            UserInfoRow(widget.article),
-            new Container(
-              padding: const EdgeInsets.all(13.0),
-              height: 120.0,
-              child: new CachedNetworkImage(
-                imageUrl: widget.article.coverUrl == null?'':widget.article.coverUrl,
-                fit: BoxFit.contain,
-                placeholder: new Image.asset('images/img_loading@3x.png'),
-                fadeInDuration: const Duration(seconds: 0),
-                fadeOutDuration: const Duration(seconds: 0),
+        child: GestureDetector(
+          onTap: widget.didSelectItem,
+          child: Column(
+            children: <Widget>[
+              UserInfoRow(widget.article),
+              new Container(
+                padding: const EdgeInsets.all(13.0),
+                height: 120.0,
+                child: new CachedNetworkImage(
+                  imageUrl: widget.article.coverUrl == null?'':widget.article.coverUrl,
+                  fit: BoxFit.contain,
+                  placeholder: new Image.asset('images/img_loading@3x.png'),
+                  fadeInDuration: const Duration(seconds: 0),
+                  fadeOutDuration: const Duration(seconds: 0),
+                ),
               ),
-            ),
-            contentRow(widget.article.mDescribe),
-            likeAndCommentRow(widget.article),
-          ],
+              contentRow(widget.article.mDescribe),
+              likeAndCommentRow(widget.article),
+            ],
+          ),
         ),
       ),
     );
