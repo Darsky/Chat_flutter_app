@@ -218,16 +218,21 @@ class UserInfoSectionState extends State<UserInfoSection>
   String _userDes;
   ImageProvider _headerImageProvider;
 
-  void _pushToLogin(){
+  void _pushToLogin() {
     if (!_logined){
       Navigator.of(context,rootNavigator: true).push(
-        new MaterialPageRoute(
-          fullscreenDialog: true,
-          builder: (context) {
+          new MaterialPageRoute(
+            fullscreenDialog: true,
+            builder: (context) {
               return new LoginController();
-              },
-        )
-      );
+            },
+          )
+      ).then((loginSuccess) {
+        if (loginSuccess) {
+          print('登录成功了');
+          _setupDisplayWithUserInfo();
+        }
+      });
     }
   }
 

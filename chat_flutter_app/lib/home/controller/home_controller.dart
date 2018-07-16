@@ -214,7 +214,6 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
                       return TimelineCard(
                         article: article,
                         didSelectItem: null,
-                        didTouchOnLike: ()=>likeOrCancelLike(article),
                         didTouchOnComment: null,
                       );
                     }
@@ -258,9 +257,8 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
 class TimelineCard extends StatefulWidget {
   Article article;
   VoidCallback didSelectItem;
-  VoidCallback didTouchOnLike;
   VoidCallback didTouchOnComment;
-  TimelineCard({this.article,this.didSelectItem,this.didTouchOnLike,this.didTouchOnComment});
+  TimelineCard({this.article,this.didSelectItem,this.didTouchOnComment});
   @override
   createState() => new _TimelineCardState();
 }
@@ -437,4 +435,3 @@ class _TimelineCardState extends State<TimelineCard> {
     );
   }
 }
-

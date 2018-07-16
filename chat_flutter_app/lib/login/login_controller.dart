@@ -201,7 +201,7 @@ class _LoginControllerState extends State<LoginController> {
 
   void finishLogin(){
     Navigator.of(context).pop();
-    Navigator.of(context).pop();
+    Navigator.of(context).pop(true);
   }
 
 
@@ -290,7 +290,6 @@ class _LoginControllerState extends State<LoginController> {
             ],
           ),
         ),
-      bottomNavigationBar: null,
       );
   }
 }
