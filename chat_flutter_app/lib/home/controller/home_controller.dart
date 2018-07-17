@@ -196,7 +196,7 @@ class _HomeControllerState extends State<HomeController> with AutomaticKeepAlive
     ContentDetailController controller = new ContentDetailController(mId: article.mId);
     Navigator.of(context,rootNavigator: true).push(
       new MaterialPageRoute(
-        fullscreenDialog: true,
+        fullscreenDialog: false,
         builder: (context) {
           return controller;
         },
